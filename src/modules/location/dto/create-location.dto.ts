@@ -1,0 +1,37 @@
+import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
+
+export class CreateLocationDto {
+  @ApiProperty()
+  @IsString()
+  @MaxLength(255)
+  @IsNotEmpty()
+  readonly location_name: string;
+
+  @ApiProperty()
+  @IsString()
+  @MaxLength(255)
+  @IsNotEmpty()
+  readonly code: string;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsNotEmpty()
+  readonly area: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsOptional()
+  readonly parent_location?: string | null;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsOptional()
+  readonly level_id?: string | null;
+}
