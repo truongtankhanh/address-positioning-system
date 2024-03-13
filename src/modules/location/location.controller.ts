@@ -1,12 +1,12 @@
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Body, Controller, Param, Post, Put, Delete } from '@nestjs/common';
 import { LocationService } from './location.service';
-import { Location } from '../../../database/enities';
+import { Location } from '../../../database/entities';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
 
 @ApiTags('Locations')
-@Controller(':build_id/location')
+@Controller('location')
 export class LocationController {
   constructor(private readonly locationService: LocationService) {}
 
@@ -14,10 +14,9 @@ export class LocationController {
   @ApiOperation({ summary: 'Create a new location' })
   @ApiResponse({ status: 201, description: 'Creates a new location' })
   async createOrder(
-    @Param('build_id') buildId: string,
     @Body() createLocationDto: CreateLocationDto,
   ): Promise<Location> {
-    return this.locationService.createLocation(buildId, createLocationDto);
+    return this.locationService.createLocation(createLocationDto);
   }
 
   @Put(':id')

@@ -1,12 +1,10 @@
-import * as Entities from '../enities';
 import { DataSource, DataSourceOptions } from 'typeorm';
+import * as Entities from '../entities';
 
 const databaseConfig: DataSourceOptions = {
   type: 'postgres',
   entities: Object.values(Entities),
-  extra: {
-    charset: 'utf8mb4_unicode_ci',
-  },
+  migrations: [__dirname + '/database/*{.ts,.js}'],
   synchronize: false,
   logging: false,
 };

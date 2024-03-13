@@ -18,7 +18,7 @@ export class CreateLocationDto {
   @IsString()
   @MaxLength(255)
   @IsNotEmpty()
-  readonly code: string;
+  readonly location_number: string;
 
   @ApiProperty()
   @IsNumber()
@@ -26,12 +26,12 @@ export class CreateLocationDto {
   readonly area: number;
 
   @ApiProperty()
-  @IsNumber()
-  @IsOptional()
-  readonly parent_location?: string | null;
+  @IsString()
+  @IsNotEmpty()
+  readonly building_id: string;
 
   @ApiProperty()
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  readonly level_id?: string | null;
+  readonly parent_location?: string | null;
 }
