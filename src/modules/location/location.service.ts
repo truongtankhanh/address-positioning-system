@@ -1,18 +1,23 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { AppDataSource } from '../../../database/config';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { Building, Location } from '../../../database/entities';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class LocationService {
+  constructor(
+    @InjectRepository(Building)
+    private readonly buidingRepository: Repository<Building>,
+    @InjectRepository(Location)
+    private readonly locationRepository: Repository<Location>,
+  ) {}
+
   async createLocation(
     createLocationDto: CreateLocationDto,
   ): Promise<Location> {
-    const buidingRepository = AppDataSource.getRepository(Building);
-    const locationRepository = AppDataSource.getRepository(Location);
-
-    const building = await buidingRepository.findOne({
+    const building = await this.buidingRepository.findOne({
       where: { id: createLocationDto.building_id },
     });
 
@@ -23,15 +28,17 @@ export class LocationService {
       );
     }
 
-    const parentLocation = await locationRepository.findOne({
-      where: { id: createLocationDto.parent_location },
-    });
+    if (createLocationDto.parent_location) {
+      const parentLocation = await this.locationRepository.findOne({
+        where: { id: createLocationDto.parent_location },
+      });
 
-    if (!parentLocation) {
-      throw new HttpException(
-        `Location ${createLocationDto.parent_location} not found`,
-        HttpStatus.NOT_FOUND,
-      );
+      if (!parentLocation) {
+        throw new HttpException(
+          `Location ${createLocationDto.parent_location} not found`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
     }
 
     const location = new Location();
@@ -41,8 +48,8 @@ export class LocationService {
     location.buildingId = createLocationDto.building_id;
     location.parentLocation = createLocationDto.parent_location;
     try {
-      const newLocation = locationRepository.create(location);
-      return await locationRepository.save(newLocation);
+      const newLocation = this.locationRepository.create(location);
+      return await this.locationRepository.save(newLocation);
     } catch (error) {
       throw new HttpException(
         (error as Error).message,
@@ -55,16 +62,14 @@ export class LocationService {
     id: string,
     updateLocationDto: UpdateLocationDto,
   ): Promise<Location> {
-    const locationRepository = AppDataSource.getRepository(Location);
-
-    const location = await locationRepository.findOne({
+    const location = await this.locationRepository.findOne({
       where: { id },
     });
     if (!location) {
       throw new HttpException(`Location ${id} not found`, HttpStatus.NOT_FOUND);
     }
 
-    const parentLocation = await locationRepository.findOne({
+    const parentLocation = await this.locationRepository.findOne({
       where: { id: updateLocationDto.parent_location },
     });
     if (!parentLocation) {
@@ -75,7 +80,8 @@ export class LocationService {
     }
     try {
       const updatedLocation = Object.assign(location, updateLocationDto);
-      return await locationRepository.save(updatedLocation);
+      updatedLocation.updatedAt = new Date();
+      return await this.locationRepository.save(updatedLocation);
     } catch (error) {
       throw new HttpException(
         (error as Error).message,
@@ -85,16 +91,14 @@ export class LocationService {
   }
 
   async deleteLocation(id: string): Promise<void> {
-    const repository = AppDataSource.getRepository(Location);
-
-    const location = await repository.findOne({
+    const location = await this.locationRepository.findOne({
       where: { id },
     });
     if (!location) {
       throw new HttpException('Location not found', HttpStatus.NOT_FOUND);
     }
 
-    const isParent = await repository.findOne({
+    const isParent = await this.locationRepository.findOne({
       where: { parentLocation: id },
     });
 
@@ -105,7 +109,7 @@ export class LocationService {
       );
     }
     try {
-      await repository.remove(location);
+      await this.locationRepository.remove(location);
     } catch (error) {
       throw new HttpException(
         (error as Error).message,

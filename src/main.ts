@@ -3,7 +3,6 @@ import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { AppDataSource, databaseOptions } from '../database/config';
 
 config();
 
@@ -20,18 +19,6 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api-docs', app, document);
-
-  // START: connect database
-  AppDataSource.setOptions(databaseOptions(process.env));
-  AppDataSource.driver.options = AppDataSource.options;
-
-  if (AppDataSource.isInitialized) {
-    Logger.debug('Reusing existing connection.');
-  } else {
-    await AppDataSource.initialize();
-    Logger.debug('Data Source has been initialized!');
-  }
-  // END: connect database
 
   const port = process.env.PORT || 3000;
   await app.listen(port);

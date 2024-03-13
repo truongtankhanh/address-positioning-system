@@ -1,2 +1,2 @@
-export * from './data-source';
 export * from './database-option';
+export * from './typeorm.config';

@@ -27,6 +27,7 @@ export class UpdateLocationDto {
 
   @ApiProperty()
   @IsString()
+  @MaxLength(255)
   @IsNotEmpty()
   readonly building_id: string;
 
